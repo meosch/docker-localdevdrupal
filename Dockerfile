@@ -36,7 +36,7 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
 	php5-cli \
 	php5-mysql \
 	php5-gd \
-	php5-curl \
+	php5-curl
 #	php5-sqlite
 
 RUN apt-get autoremove && apt-get clean
