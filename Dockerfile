@@ -1,5 +1,5 @@
 FROM debian:wheezy
-MAINTAINER Jose de Leon <jose_de_leon@hotmail.com>
+MAINTAINER Frederick J. Henderson <frederickjh@henderson-meier.org>
 ENV DEBIAN_FRONTEND noninteractive
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
@@ -25,20 +25,13 @@ RUN curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -
 RUN apt-get install --yes nodejs
 RUN curl -L --insecure https://www.npmjs.org/install.sh | bash
 
-# Install MongoDB
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-RUN echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' | tee /etc/apt/sources.list.d/mongodb.list
-RUN apt-get update
-RUN mkdir -p /data/db
-RUN apt-get install -y adduser mongodb-org-server mongodb-org-shell
-
 # Install updated PHP 5.6 and Apache from dotdeb.org repository
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy all\ndeb-src http://packages.dotdeb.org wheezy all\n\n' >>  /etc/apt/sources.list
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy-php56 all\ndeb-src http://packages.dotdeb.org wheezy-php56 all\n\n' >>  /etc/apt/sources.list
 RUN wget --quiet -O - https://www.dotdeb.org/dotdeb.gpg | apt-key add -
 RUN apt-get update && apt-get upgrade && apt-get install -y \
 	apache2 \
-	sqlite3 \
+#	sqlite3 \
 	libapache2-mod-php5 \
 	mysql-server \
 	mysql-client \
@@ -49,13 +42,7 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
 	php5-mysql \
 	php5-gd \
 	php5-curl \
-	php5-sqlite
-
-# Install PostgreSQL 9.4 from PostgreSQL repository 
-RUN echo -e '\n\ndeb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main\n\n' >>  /etc/apt/sources.list
-RUN apt-get -y install ca-certificates
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN apt-get update && apt-get upgrade && apt-get install -y postgresql-9.4 postgresql-client php5-pgsql
+#	php5-sqlite
 
 RUN apt-get autoremove && apt-get clean
 
@@ -63,8 +50,8 @@ RUN apt-get autoremove && apt-get clean
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 
-# Install Drush dev-master
-RUN composer global require drush/drush:dev-master
+# Install Drush 7.
+RUN composer global require drush/drush:7.*
 RUN composer global update
 # Unfortunately, adding the composer vendor dir to the PATH doesn't seem to work. So:
 RUN ln -s /root/.composer/vendor/bin/drush /usr/local/bin/drush
@@ -91,31 +78,12 @@ RUN echo -e '*\n' | a2enmod
 # Setup MySQL, bind on all addresses
 RUN sed -i -e 's/^bind-address\s*=\s*127.0.0.1/#bind-address = 127.0.0.1/' /etc/mysql/my.cnf
 
-# Configure PostgreSQL
-RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.4/main/pg_hba.conf
-RUN echo "listen_addresses='*'" >> /etc/postgresql/9.4/main/postgresql.conf
-
-# there might be a docker bug that postgresql could access /etc/ssl/private/ssl-cert-snakeoil.key
-RUN sed -i "s/ssl = true/ssl = false/g" /etc/postgresql/9.4/main/postgresql.conf
-
-# start postgresql and reset postgres user's password
-USER postgres
-RUN /etc/init.d/postgresql start && \
-    psql -e --command "ALTER USER postgres WITH PASSWORD 'postgres'" && \
-    /etc/init.d/postgresql stop
-# Go back to root
-USER root
-
 # Setup SSH.
 RUN echo 'root:root' | chpasswd
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN mkdir /var/run/sshd && chmod 0755 /var/run/sshd
 RUN mkdir -p /root/.ssh/ && touch /root/.ssh/authorized_keys
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-# Setup PHP support for MongoDB
-RUN echo -e '\n' | pecl install mongo
-RUN echo -e '\nextension = mongo.so\n\n' >> /etc/php5/apache2/php.ini
 
 # Setup PHP support for uploadprogress
 RUN echo -e '\n' | pecl install uploadprogress
@@ -126,12 +94,6 @@ RUN echo -e '\n[inet_http_server]\nport = *:9001\nusername = supervisor\npasswor
 RUN echo -e '[program:apache2]\ncommand=/bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apache2 -DFOREGROUND"\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
 RUN echo -e '[program:mysql]\ncommand=/usr/bin/pidproxy /var/run/mysqld/mysqld.pid /usr/sbin/mysqld\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
 RUN echo -e '[program:sshd]\ncommand=/usr/sbin/sshd -D\n\n' >> /etc/supervisor/supervisord.conf
-# Setup Supervisor PostgreSQL
-RUN echo -e '[program:postgresql]\nuser=postgres\nautorestart=true\ncommand=/usr/lib/postgresql/9.4/bin/postgres -D /var/lib/postgresql/9.4/main -c config_file=/etc/postgresql/9.4/main/postgresql.conf\n\n' >> /etc/supervisor/supervisord.conf
-# Setup Supervisor Solr
-RUN echo -e '[program:solr]\ncommand=/usr/bin/java -Xmx512M -server -jar start.jar\ndirectory=/usr/share/solr/example\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
-# Setup Supervisor MongoDB
-RUN echo -e '[program:mongod]\ncommand=/usr/bin/mongod --smallfiles\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
 
 # Download Drupal
 RUN rm -rf /var/www
@@ -163,17 +125,6 @@ RUN service apache2 restart
 
 # Start MySQL
 RUN /etc/init.d/mysql start
-
-# Start PostgreSQL
-RUN /etc/init.d/postgresql start
-
-# Start MongoDB
-RUN service mongod start
-
-# Setup Solr
-RUN wget -c http://archive.apache.org/dist/lucene/solr/4.10.4/solr-4.10.4.tgz -O /tmp/solr-4.10.4.tgz
-RUN cd /tmp && tar xzf solr-4.10.4.tgz && mv solr-4.10.4 /usr/share/solr && rm /tmp/solr-4.10.4.tgz
-RUN cd /usr/share/solr/example && /usr/bin/java -Xmx512M -server -jar start.jar &
 
 # Install Drupal
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
