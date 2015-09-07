@@ -50,7 +50,7 @@ https://github.com/jmdeleon/docker-drupal
 
 Clone the repository locally and build it:
 
-	git clone https://github.com/jmdeleon/docker-drupal.git
+	git clone https://github.com/frederickjh/docker-drupal.git
 	cd docker-drupal
 	docker build -t yourname/drupal .
 
