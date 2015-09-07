@@ -25,7 +25,7 @@ RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy all\ndeb-src http://packa
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy-php56 all\ndeb-src http://packages.dotdeb.org wheezy-php56 all\n\n' >>  /etc/apt/sources.list
 RUN wget --quiet -O - https://www.dotdeb.org/dotdeb.gpg | apt-key add -
 RUN apt-get update
-RUN apt-get upgrade
+RUN apt-get upgrade -y
 RUN apt-get install -y \
 	apache2 \
 #	sqlite3 \
