@@ -1,6 +1,7 @@
 Drupal development with Docker
 ==============================
-
+NOTE: This is a work in progress and the Readme has not been updated.
+==============================
 Quick and easy to use Docker container for your local Drupal development. It contains a LAMP stack and an SSH server, along with an up to date version of Drush. It is based on [Debian Wheezy](https://wiki.debian.org/DebianWheezy).
 
 Summary
