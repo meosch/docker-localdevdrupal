@@ -20,11 +20,6 @@ RUN apt-get update && apt-get install -y \
 RUN echo "deb http://http.debian.net/debian wheezy-backports main" > /etc/apt/sources.list.d/wheezy-backports.list
 RUN apt-get update -qq && apt-get -t wheezy-backports install -y -qq git mercurial
 
-# Install Node.js
-RUN curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -
-RUN apt-get install --yes nodejs
-RUN curl -L --insecure https://www.npmjs.org/install.sh | bash
-
 # Install updated PHP 5.6 and Apache from dotdeb.org repository
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy all\ndeb-src http://packages.dotdeb.org wheezy all\n\n' >>  /etc/apt/sources.list
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy-php56 all\ndeb-src http://packages.dotdeb.org wheezy-php56 all\n\n' >>  /etc/apt/sources.list
@@ -111,9 +106,6 @@ RUN mkdir -p /var/www/sites/default/files && \
 	mkdir /var/www/sites/all/themes/custom && \
 	chown -R www-data:www-data /var/www/
 
-# Setup Node.js build tools
-RUN npm install -g grunt grunt-cli yo bower coffee-script express mongodb pg mysql sqlite3
-
 # Setup Adminer
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
@@ -130,5 +122,5 @@ RUN /etc/init.d/mysql start
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
 
 # Expose application ports and start Supervisor to manage service applications
-EXPOSE 80 3306 22 5432 8983 9001 27017 28017
+EXPOSE 80 3306 22 9001 27017 28017
 CMD exec supervisord -n
