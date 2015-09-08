@@ -54,7 +54,7 @@ Clone the repository locally and build it:
 
 Get the image:
 
-~~	docker pull jmdeleon/docker-drupal-wxt~~
+~~docker pull jmdeleon/docker-drupal-wxt~~
 
 Running the container
 ---------------------
