@@ -94,7 +94,7 @@ RUN echo -e '[program:mysql]\ncommand=/usr/bin/pidproxy /var/run/mysqld/mysqld.p
 RUN echo -e '[program:sshd]\ncommand=/usr/sbin/sshd -D\n\n' >> /etc/supervisor/supervisord.conf
 
 # Download Drupal
-RUN mkdir -p /var/www/docroot
+RUN mkdir -p /var/www/public_html
 #RUN rm -rf /var/www
 #RUN cd /var && \
 # Download the Web Experience Toolkit Drupal distribution
@@ -108,7 +108,10 @@ RUN mkdir -p /var/www/docroot
 #	mkdir /var/www/sites/all/modules/features && \
 #	mkdir /var/www/sites/all/themes/contrib -p && \
 #	mkdir /var/www/sites/all/themes/custom && \
-RUN	chown -R www-data:www-data /var/www/
+RUN groupadd -r docker && \
+    useradd -r -g docker docker && \
+  	chown -R www-data:docker /var/www/ && \
+    chmod g+w -R /var/www/
 
 # Setup Adminer
 RUN mkdir /usr/share/adminer
