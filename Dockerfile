@@ -6,7 +6,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # Install base packages
 RUN apt-get update && apt-get install -y \
 	build-essential \
-	vim \
+#	vim \
 	curl \
 	wget \
 	nano \
@@ -38,7 +38,8 @@ RUN apt-get install -y \
 	php5-cli \
 	php5-mysql \
 	php5-gd \
-	php5-curl
+	php5-curl \
+	php5-mcrypt
 #	php5-sqlite
 
 RUN apt-get autoremove && apt-get clean
@@ -93,27 +94,28 @@ RUN echo -e '[program:mysql]\ncommand=/usr/bin/pidproxy /var/run/mysqld/mysqld.p
 RUN echo -e '[program:sshd]\ncommand=/usr/sbin/sshd -D\n\n' >> /etc/supervisor/supervisord.conf
 
 # Download Drupal
-RUN rm -rf /var/www
-RUN cd /var && \
+RUN mkdir -p /var/www/docroot
+#RUN rm -rf /var/www
+#RUN cd /var && \
 # Download the Web Experience Toolkit Drupal distribution
-	drush dl wetkit-7.x-4.x-dev && mv /var/wetkit* /var/www
+#	drush dl wetkit-7.x-4.x-dev && mv /var/wetkit* /var/www
 # Replace the line above with the line below to download the stock Drupal core distribution
 #	drush dl drupal && mv /var/drupal* /var/www
-RUN mkdir -p /var/www/sites/default/files && \
-	chmod a+w /var/www/sites -R && \
-	mkdir /var/www/sites/all/modules/contrib -p && \
-	mkdir /var/www/sites/all/modules/custom && \
-	mkdir /var/www/sites/all/modules/features && \
-	mkdir /var/www/sites/all/themes/contrib -p && \
-	mkdir /var/www/sites/all/themes/custom && \
-	chown -R www-data:www-data /var/www/
+# RUN mkdir -p /var/www/sites/default/files && \
+#	chmod a+w /var/www/sites -R && \
+#	mkdir /var/www/sites/all/modules/contrib -p && \
+#	mkdir /var/www/sites/all/modules/custom && \
+#	mkdir /var/www/sites/all/modules/features && \
+#	mkdir /var/www/sites/all/themes/contrib -p && \
+#	mkdir /var/www/sites/all/themes/custom && \
+RUN	chown -R www-data:www-data /var/www/
 
 # Setup Adminer
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
 RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/php-info.php
-RUN echo -e 'Alias /php-info.php /usr/share/adminer/php-info.php' > /etc/apache2/mods-available/adminer.load
-RUN echo -e 'Alias /adminer.php /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
+RUN echo -e 'Alias /php-info /usr/share/adminer/php-info.php' > /etc/apache2/mods-available/adminer.load
+RUN echo -e 'Alias /adminer /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
 RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
 
