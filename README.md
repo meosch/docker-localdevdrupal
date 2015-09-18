@@ -40,12 +40,12 @@ Installation
 
 ### Github
 
-https://github.com/meosch/docker-drupal
+https://github.com/meosch/docker-localdevdrupal
 
 Clone the repository locally and build it:
 
-	git clone https://github.com/meosch/docker-drupal.git
-	cd docker-drupal
+    git clone https://github.com/meosch/docker-localdevdrupal.git
+	cd docker-localdevdrupal
 	docker build -t yourname/drupal .
 
 ### Docker repository
