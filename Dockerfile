@@ -6,7 +6,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # Install base packages
 RUN apt-get update && apt-get install -y \
 	build-essential \
-	vim \
+#	vim \
 	curl \
 	wget \
 	nano \
@@ -30,7 +30,7 @@ RUN apt-get install -y \
 	apache2 \
 #	sqlite3 \
 	libapache2-mod-php5 \
-	mysql-server \
+#	mysql-server \
 	mysql-client \
 	php5-fpm \
 	php5-dev \
@@ -38,7 +38,8 @@ RUN apt-get install -y \
 	php5-cli \
 	php5-mysql \
 	php5-gd \
-	php5-curl
+	php5-curl \
+	php5-mcrypt
 #	php5-sqlite
 
 RUN apt-get autoremove && apt-get clean
@@ -72,6 +73,31 @@ RUN echo "Listen 8080" >> /etc/apache2/ports.conf
 RUN sed -i 's/VirtualHost *:80/VirtualHost */' /etc/apache2/sites-available/default
 RUN echo -e '*\n' | a2enmod
 
+# Some Environment Variables
+ENV    DEBIAN_FRONTEND noninteractive
+
+# MySQL Installation
+RUN apt-get update
+RUN echo "mysql-server mysql-server/root_password password " | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password_again password " | debconf-set-selections
+RUN apt-get install -y mysql-server
+
+# Set the configuration
+ADD dockerfilescripts/my.cnf /etc/mysql/conf.d/my.cnf
+RUN chmod 644 /etc/mysql/conf.d/my.cnf
+RUN cp /usr/share/doc/mysql-server-5.6/examples/my-default.cnf /usr/share/mysql/
+
+ADD dockerfilescripts/run.sh /run.sh
+ADD dockerfilescripts/create_first_admin_user.sh /create_first_admin_user.sh
+ADD dockerfilescripts/create_database_and_users.sh /create_database_and_users.sh
+RUN chmod 755 /*.sh
+
+# Expose port and volumes
+EXPOSE 3306
+VOLUME ["/var/log/mysql", "/etc/mysqld", "/var/run/mysqld"]
+
+
+
 # Setup MySQL, bind on all addresses
 RUN sed -i -e 's/^bind-address\s*=\s*127.0.0.1/#bind-address = 127.0.0.1/' /etc/mysql/my.cnf
 
@@ -93,36 +119,42 @@ RUN echo -e '[program:mysql]\ncommand=/usr/bin/pidproxy /var/run/mysqld/mysqld.p
 RUN echo -e '[program:sshd]\ncommand=/usr/sbin/sshd -D\n\n' >> /etc/supervisor/supervisord.conf
 
 # Download Drupal
-RUN rm -rf /var/www
-RUN cd /var && \
+RUN mkdir -p /var/www/public_html
+#RUN rm -rf /var/www
+#RUN cd /var && \
 # Download the Web Experience Toolkit Drupal distribution
-	drush dl wetkit-7.x-4.x-dev && mv /var/wetkit* /var/www
+#	drush dl wetkit-7.x-4.x-dev && mv /var/wetkit* /var/www
 # Replace the line above with the line below to download the stock Drupal core distribution
 #	drush dl drupal && mv /var/drupal* /var/www
-RUN mkdir -p /var/www/sites/default/files && \
-	chmod a+w /var/www/sites -R && \
-	mkdir /var/www/sites/all/modules/contrib -p && \
-	mkdir /var/www/sites/all/modules/custom && \
-	mkdir /var/www/sites/all/modules/features && \
-	mkdir /var/www/sites/all/themes/contrib -p && \
-	mkdir /var/www/sites/all/themes/custom && \
-	chown -R www-data:www-data /var/www/
+# RUN mkdir -p /var/www/sites/default/files && \
+#	chmod a+w /var/www/sites -R && \
+#	mkdir /var/www/sites/all/modules/contrib -p && \
+#	mkdir /var/www/sites/all/modules/custom && \
+#	mkdir /var/www/sites/all/modules/features && \
+#	mkdir /var/www/sites/all/themes/contrib -p && \
+#	mkdir /var/www/sites/all/themes/custom && \
+RUN groupadd -r docker && \
+    useradd -r -g docker docker && \
+  	chown -R www-data:docker /var/www/ && \
+    chmod g+w -R /var/www/
 
 # Setup Adminer
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
 RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/php-info.php
-RUN echo -e 'Alias /php-info.php /usr/share/adminer/php-info.php' > /etc/apache2/mods-available/adminer.load
-RUN echo -e 'Alias /adminer.php /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
+RUN echo -e 'Alias /php-info /usr/share/adminer/php-info.php' > /etc/apache2/mods-available/adminer.load
+RUN echo -e 'Alias /adminer /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
 RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
 
 # Start MySQL
-RUN /etc/init.d/mysql start
+#RUN /etc/init.d/mysql start
 
 # Install Drupal
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
 
 # Expose application ports and start Supervisor to manage service applications
 EXPOSE 80 3306 22 9001 27017 28017
-CMD exec supervisord -n
+# Start the magic
+CMD ["/run.sh"]
+#CMD exec supervisord -n

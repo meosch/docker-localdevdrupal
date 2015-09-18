@@ -11,13 +11,10 @@ This image contains:
 
 * Apache 2.2
 * MySQL 5.6
-* PostgreSQL 9.4
-* SQLite 3.7
 * PHP 5.6
 * Drupal 7.x, [Web Experience Toolkit distribution](https://www.drupal.org/project/wetkit) 4.0, development edition (optionally supports current Drupal)
 * [Composer](https://getcomposer.org/)
-* Drush dev-master version
-* Apache Solr 4.10.4
+* Drush 7.x version
 * Adminer latest
 * Supervisor
 * nano, vim, git and Mercurial (hg)
@@ -28,7 +25,6 @@ When launched, the container will contain a ready-to-install Drupal distribution
 
 * Drupal: `admin:admin`
 * MySQL: `root:` (no password)
-* PostgreSQL: `postgres:postgres`
 * SSH: `root:root`
 * Supervisor `supervisor:supervisor`
 
@@ -37,8 +33,6 @@ When launched, the container will contain a ready-to-install Drupal distribution
 * 80 (Apache)
 * 22 (SSH)
 * 3306 (MySQL)
-* 5432 (PostgreSQL)
-* 8983 (Solr)
 * 9001 (Supervisor)
 
 Installation
