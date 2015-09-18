@@ -50,11 +50,12 @@ Clone the repository locally and build it:
 
 ### Docker repository
 
-~~https://registry.hub.docker.com/u/jmdeleon/docker-drupal-wxt/~~
+  https://hub.docker.com/r/meosch/localdevdrupal/
+
 
 Get the image:
 
-~~docker pull jmdeleon/docker-drupal-wxt~~
+  docker pull meosch/localdevdrupal
 
 Running the container
 ---------------------
