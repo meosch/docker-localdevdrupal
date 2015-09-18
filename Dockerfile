@@ -31,7 +31,7 @@ RUN apt-get install -y \
 	apache2 \
 #	sqlite3 \
 	libapache2-mod-php5 \
-	mysql-server \
+#	mysql-server \
 	mysql-client \
 	php5-fpm \
 	php5-dev \
@@ -124,11 +124,13 @@ RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
 
 # Start MySQL
-RUN /etc/init.d/mysql start
+#RUN /etc/init.d/mysql start
 
 # Install Drupal
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
 
 # Expose application ports and start Supervisor to manage service applications
 EXPOSE 80 3306 22 9001 27017 28017
-CMD exec supervisord -n
+# Start the magic
+CMD ["/run.sh"]
+#CMD exec supervisord -n
