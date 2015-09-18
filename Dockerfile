@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
 #	vim \
 	curl \
 	wget \
+	unzip \
 	nano \
 	openssh-server \
 	openjdk-7-jdk \
