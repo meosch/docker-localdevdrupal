@@ -45,16 +45,17 @@ https://github.com/frederickjh/docker-drupal
 Clone the repository locally and build it:
 
 	git clone https://github.com/frederickjh/docker-drupal.git
-	cd docker-drupal
+	cd dockerdrupal
 	docker build -t yourname/drupal .
+
 
 ### Docker repository
 
-~~https://registry.hub.docker.com/u/jmdeleon/docker-drupal-wxt/~~
+  
 
 Get the image:
 
-~~docker pull jmdeleon/docker-drupal-wxt~~
+  
 
 Running the container
 ---------------------
