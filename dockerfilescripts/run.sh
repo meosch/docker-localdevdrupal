@@ -14,4 +14,4 @@ else
 fi
 echo "=> Starting Supervisor daemon"
 exec supervisord -n
-#exec mysqld_safe
+
