@@ -47,6 +47,8 @@ Clone the repository locally and build it:
     git clone https://github.com/meosch/docker-localdevdrupal.git
 	cd docker-localdevdrupal
 	docker build -t yourname/drupal .
+	
+	or run the build.sh script to use the default name.	
 
 ### Docker repository
 
