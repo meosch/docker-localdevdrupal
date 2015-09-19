@@ -74,6 +74,31 @@ RUN echo "Listen 8080" >> /etc/apache2/ports.conf
 RUN sed -i 's/VirtualHost *:80/VirtualHost */' /etc/apache2/sites-available/default
 RUN echo -e '*\n' | a2enmod
 
+# Some Environment Variables
+ENV    DEBIAN_FRONTEND noninteractive
+
+# MySQL Installation
+RUN apt-get update
+RUN echo "mysql-server mysql-server/root_password password " | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password_again password " | debconf-set-selections
+RUN apt-get install -y mysql-server
+
+# Set the configuration
+ADD dockerfilescripts/my.cnf /etc/mysql/conf.d/my.cnf
+RUN chmod 644 /etc/mysql/conf.d/my.cnf
+RUN cp /usr/share/doc/mysql-server-5.6/examples/my-default.cnf /usr/share/mysql/
+
+ADD dockerfilescripts/run.sh /run.sh
+ADD dockerfilescripts/create_first_admin_user.sh /create_first_admin_user.sh
+ADD dockerfilescripts/create_database_and_users.sh /create_database_and_users.sh
+RUN chmod 755 /*.sh
+
+# Expose port and volumes
+EXPOSE 3306
+VOLUME ["/var/log/mysql", "/etc/mysqld", "/var/run/mysqld"]
+
+
+
 # Setup MySQL, bind on all addresses
 RUN sed -i -e 's/^bind-address\s*=\s*127.0.0.1/#bind-address = 127.0.0.1/' /etc/mysql/my.cnf
 
