@@ -86,6 +86,8 @@ RUN apt-get install -y mysql-server
 # Set the configuration
 ADD dockerfilescripts/my.cnf /etc/mysql/conf.d/my.cnf
 RUN chmod 644 /etc/mysql/conf.d/my.cnf
+# Small issue with mysql_install_db on
+# https://github.com/gplessis/dotdeb-mysql/issues/11
 RUN cp /usr/share/doc/mysql-server-5.6/examples/my-default.cnf /usr/share/mysql/
 
 ADD dockerfilescripts/run.sh /run.sh
