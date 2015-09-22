@@ -145,8 +145,8 @@ RUN groupadd -r docker && \
 # Setup Adminer
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
-RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/php-info.php
-RUN echo -e 'Alias /php-info /usr/share/adminer/php-info.php' > /etc/apache2/mods-available/adminer.load
+RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/phpinfo.php
+RUN echo -e 'Alias /phpinfo /usr/share/adminer/phpinfo.php' > /etc/apache2/mods-available/adminer.load
 RUN echo -e 'Alias /adminer /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
 RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
