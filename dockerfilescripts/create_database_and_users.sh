@@ -13,9 +13,13 @@ while [[ RET -ne 0 ]]; do
     RET=$?
 done
 
-DATABASES=("database1" "database2")
-declare -A USERS=(["user1"]="pass1" ["user2"]="pass2")
-ADMINS=("user1")
+#DATABASES=("database1" "database2")
+#declare -A USERS=(["user1"]="pass1" ["user2"]="pass2")
+#ADMINS=("user1")
+
+DATABASES=("drupal")
+declare -A USERS=(["drupal"]="drupalrocks")
+ADMINS=("drupal")
 
 # Create databases
 for DB in ${DATABASES[*]}; do
