@@ -41,4 +41,9 @@ for ADMIN in "${ADMINS[*]}"; do
     mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO '$ADMIN'@'%';"
 done
 
+# Delete @localhost user to allow our users to access localhost
+# http://serverfault.com/questions/122472/allowing-wildcard-access-on-mysql-db-getting-error-access-denied-for-use
+mysql -uroot -e "USE mysql;DELETE FROM mysql.user WHERE user='' AND host='localhost';"
+mysql -uroot -e "FLUSH PRIVILEGES;"
+
 mysqladmin -uroot shutdown
