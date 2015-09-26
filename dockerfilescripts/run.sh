@@ -17,18 +17,6 @@ copy_ssh_key ()
   fi
 }
 
-# Copy Acquia Cloud API credentials
-# @param $1 path to the home directory (parent of the .acquia directory)
-copy_dot_acquia ()
-{
-  local path="$1/.acquia/cloudapi.conf"
-  if [ -f $path ]; then
-    echo "Copying Acquia Cloud API settings in $path from host..."
-    mkdir -p ~/.acquia
-    cp $path ~/.acquia
-  fi
-}
-
 # Copy Drush settings from host
 # @param $1 path to the home directory (parent of the .drush directory)
 copy_dot_drush ()
@@ -51,16 +39,10 @@ copy_dot_bash ()
   fi
 }
 
-
 # Copy SSH keys from host if available
 copy_ssh_key '/.home/.ssh' # Generic
 copy_ssh_key '/.home-linux/.ssh' # Linux (docker-compose)
 copy_ssh_key '/.home-b2d/.ssh' # boot2docker (docker-compose)
-
-# Copy Acquia Cloud API credentials from host if available
-copy_dot_acquia '/.home' # Generic
-copy_dot_acquia '/.home-linux' # Linux (docker-compose)
-copy_dot_acquia '/.home-b2d' # boot2docker (docker-compose)
 
 # Copy Drush settings from host if available
 copy_dot_drush '/.home' # Generic
@@ -73,21 +55,7 @@ copy_dot_bash '/.home-localdev'
 cp  /.home-localdev/{.b,.dr,.p}*  ~ 2>/dev/null 
 
 # Copy scripts from artificial $HOME folder if available
-cp  /.home-localdev/bin/*  ~/bin/ 2>/dev/null
-
-echo "PHP5-FPM with environment variables"
-# Update php5-fpm with access to Docker environment variables
-ENV_CONF=/etc/php5/fpm/pool.d/env.conf
-echo '[www]' > $ENV_CONF
-for var in $(env | awk -F= '{print $1}'); do
-	# Skip empty/bad variables as this will blow up PHP FPM.
-	if [[ ${!var} == '' || ${var} == '_' ]]; then
-		echo "Skipping empty/bad variable: ${var}"
-	else
-		echo "Adding variable: ${var} = ${!var}"
-		echo "env[${var}] = ${!var}" >> $ENV_CONF
-	fi
-done
+cp  /.home-localdev/bin/* ~/bin/ 2>/dev/null
 
 # Below this is the original startup. Above are the commands brought in from the cli container.
 VOLUME_HOME="/data" 

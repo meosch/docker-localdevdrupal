@@ -154,9 +154,6 @@ RUN service apache2 restart
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm
 
-# Default SSH key name
-ENV SSH_KEY_NAME id_rsa
-
 # Install Drupal
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
 
