@@ -151,8 +151,11 @@ RUN echo -e 'Alias /adminer /usr/share/adminer/adminer.php' >> /etc/apache2/mods
 RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
 
-# Start MySQL
-#RUN /etc/init.d/mysql start
+# Set TERM so text editors/etc. can be used
+ENV TERM xterm
+
+# Default SSH key name
+ENV SSH_KEY_NAME id_rsa
 
 # Install Drupal
 # RUN cd /var/www && drush si -y minimal --db-url=mysql://root:@localhost/drupal --account-pass=admin
