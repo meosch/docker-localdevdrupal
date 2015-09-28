@@ -28,7 +28,7 @@ A MySQL data base is created if none exists.
 * User password: drupalrocks
 
 ### Docker Compose to pull a Deveolpment Environment together
-This container is being used as part of the meosch/docker-compose-localdevmeos project found at  https://github.com/meosch/docker-compose-localdevmeos The docker-compose.yml in that project will use this container with someothers to setup a full development environment.
+This container is being used as part of the meosch/docker-compose-localdevmeos project found at  https://github.com/meosch/docker-compose-localdevmeos The docker-compose.yml in that project will use this container with someothers to setup a full development environcd ment.
 
 ### Passwords
 
