@@ -12,18 +12,24 @@ This image contains:
 * Apache 2.2
 * MySQL 5.6
 * PHP 5.6
-* Drupal 7.x, [Web Experience Toolkit distribution](https://www.drupal.org/project/wetkit) 4.0, development edition (optionally supports current Drupal)
+* ~~Drupal 7.x, [Web Experience Toolkit distribution](https://www.drupal.org/project/wetkit) 4.0, development edition (optionally supports current Drupal)~~
 * [Composer](https://getcomposer.org/)
 * Drush 7.x version
 * Adminer latest
 * Supervisor
 * nano, vim, git and Mercurial (hg)
 
-When launched, the container will contain a ready-to-install Drupal distribution, with no database configured. You need to first create a database by using Adminer off the web root at `/adminer.php`, then select one of PostgreSQL, MySQL or SQLite as a database, when kicking off a Drupal install.
+~~When launched, the container will contain a ready-to-install Drupal distribution, with no database configured. You need to first create a database by using Adminer off the web root at `/adminer.php`, then select one of PostgreSQL, MySQL or SQLite as a database, when kicking off a Drupal install.~~
+
+A MySQL data base is created if none exists.
+
+* Database name: drupal
+* Database username: drupal
+* User password: drupalrocks
 
 ### Passwords
 
-* Drupal: `admin:admin`
+* ~~Drupal: `admin:admin`~~
 * MySQL: `root:` (no password)
 * SSH: `root:root`
 * Supervisor `supervisor:supervisor`
@@ -69,9 +75,15 @@ Here's an example just running the container and forwarding `localhost:8080`, `l
 
 	docker run --rm --name youralias -p 8080:80 -p 2222:22 -p 9201:9001 yourname/drupal
 
-### MySQL and Adminer
+### Adminer
 
-[Adminer](http://www.adminer.org/) is a tool that can be used to administer MySQL, PostgreSQL and SQLite databases, contained in a single file of PHP. Adminer is aliased to the web root at `/adminer.php`.
+[Adminer](http://www.adminer.org/) is a tool that can be used to administer, PostgreSQL and SQLite databases, contained in a single file of PHP. Adminer is aliased to the web root at `/adminer`.
+
+### PHP Info
+
+PHP Info for the running container is aliased to the webroot at `/phpinfo`.
+
+### MySQL
 
 The MySQL port `3306` is exposed. The root account for MySQL is `root` (no password).
 
