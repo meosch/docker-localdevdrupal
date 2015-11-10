@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t meosch/localdevdrupal .
+docker build -no-cache -t meosch/localdevdrupal .
