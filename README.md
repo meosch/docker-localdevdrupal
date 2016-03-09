@@ -80,7 +80,7 @@ Here's an example just running the container and forwarding `localhost:8080`, `l
 
 ### Adminer
 
-[Adminer](http://www.adminer.org/) is a tool that can be used to administer, PostgreSQL and SQLite databases, contained in a single file of PHP. Adminer is aliased to the web root at `/adminer`.
+[Adminer](http://www.adminer.org/) is a tool that can be used to administer, PostgreSQL and SQLite databases, contained in a single file of PHP. Adminer is aliased to the web root at `/adminer`. Symlinks have been created to the containers webroot (**/var/www/**) for importing the **adminer.sql** and **adminer.sql.gz** files. Just place you .sql or .sql.gz file in the webroot, rename it, then you can import it in Adminer.
 
 ### PHP Info
 

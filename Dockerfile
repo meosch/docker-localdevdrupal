@@ -150,6 +150,8 @@ RUN echo -e 'Alias /phpinfo /usr/share/adminer/phpinfo.php' > /etc/apache2/mods-
 RUN echo -e 'Alias /adminer /usr/share/adminer/adminer.php' >> /etc/apache2/mods-available/adminer.load
 RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
+RUN ln -s -T /var/www/adminer.sql.gz /usr/share/adminer/adminer.sql.gz
+RUN ln -s -T /var/www/adminer.sql /usr/share/adminer/adminer.sql
 
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm
