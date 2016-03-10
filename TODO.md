@@ -11,7 +11,7 @@ Todo
 * Add fish shell to development container
 * add gitflow
 * consider adding a [docker-compose.override.yml](https://docs.docker.com/compose/extends/) file to simplify manual edits to development environments
-* 
+* Possibly setup a container for email testing using MailDev.  http://djfarrelly.github.io/MailDev/
 * 
 * 
 * 
