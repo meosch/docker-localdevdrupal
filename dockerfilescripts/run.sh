@@ -72,6 +72,9 @@ if [[ ! -d $VOLUME_HOME/mysql ]]; then
 else
     echo "=> Using an existing volume of MySQL"
 fi
+# Fix MySQL socke ownership issues.
+chown mysql:root /var/run/mysqld
+chmod u+s /var/run/mysqldd
 echo "=> Starting Supervisor daemon"
 exec supervisord -n
 
