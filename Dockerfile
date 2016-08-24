@@ -25,6 +25,9 @@ RUN apt-get update -qq && apt-get -t wheezy-backports install -y -qq git mercuri
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy all\ndeb-src http://packages.dotdeb.org wheezy all\n\n' >>  /etc/apt/sources.list
 RUN echo -e '\n\ndeb http://packages.dotdeb.org wheezy-php56 all\ndeb-src http://packages.dotdeb.org wheezy-php56 all\n\n' >>  /etc/apt/sources.list
 RUN wget --quiet -O - https://www.dotdeb.org/dotdeb.gpg | apt-key add -
+# Install newer version of fish shell
+RUN echo 'deb http://download.opensuse.org/repositories/shells:/fish:/release:/2/Debian_7.0/ /' >> /etc/apt/sources.list.d/fish.list
+RUN wget --quiet -O - http://download.opensuse.org/repositories/shells:fish:release:2/Debian_7.0/Release.key | apt-key add -
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -y \
@@ -40,20 +43,32 @@ RUN apt-get install -y \
 	php5-mysql \
 	php5-gd \
 	php5-curl \
-	php5-mcrypt
-#	php5-sqlite
+	php5-mcrypt \
+#	php5-sqlite \
+  sudo \
+  fish
+
+RUN \
+# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user. From blinkreaction/docker-drupal-base - docker-drupal-base/jessie/Dockerfile
+curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+    chown root:users /usr/local/bin/gosu && \
+    chmod +sx /usr/local/bin/gosu
+
+RUN \
+    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Install github's hub. A command-line wrapper for git that makes you better at GitHub.
+RUN wget -O /tmp/hub-linux-amd64-2.2.5.tgz https://github.com/github/hub/releases/download/v2.2.5/hub-linux-amd64-2.2.5.tgz
+RUN cd /tmp
+RUN tar -zxvf /tmp/hub-linux-amd64-2.2.5.tgz
+RUN cp ./hub-linux-amd64-2.2.5/bin/hub /usr/local/sbin
+RUN cp ./hub-linux-amd64-2.2.5/etc/hub.bash_completion.sh /usr/local/sbin
+RUN rm -rf ./hub-linux-amd64-2.2.5
+RUN rm /tmp/hub-linux-amd64-2.2.5.tgz
 
 RUN apt-get autoremove && apt-get clean
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php
-RUN mv composer.phar /usr/local/bin/composer
-
-# Install Drush 7.
-RUN composer global require drush/drush:7.*
-RUN composer global update
-# Unfortunately, adding the composer vendor dir to the PATH doesn't seem to work. So:
-RUN ln -s /root/.composer/vendor/bin/drush /usr/local/bin/drush
 
 # Setup PHP
 RUN sed -i 's/display_errors = Off/display_errors = On/' /etc/php5/cli/php.ini
@@ -65,6 +80,7 @@ RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 300M/' /etc/php5/ap
 RUN sed -i 's/zlib.output_compression = Off/zlib.output_compression = On/' /etc/php5/apache2/php.ini
 RUN sed -i 's/;date.timezone =/date.timezone = "UTC"/' /etc/php5/apache2/php.ini
 RUN sed -i 's/;opcache.memory_consumption=64/opcache.memory_consumption=128/' /etc/php5/apache2/php.ini
+RUN sed -i 's/user = /c user = docker/' /etc/php5/apache2/php.ini
 
 # Setup Apache
 # In order to run our Simpletest tests, we need to make Apache
@@ -138,10 +154,11 @@ RUN mkdir -p /var/www/public_html
 #	mkdir /var/www/sites/all/modules/features && \
 #	mkdir /var/www/sites/all/themes/contrib -p && \
 #	mkdir /var/www/sites/all/themes/custom && \
-RUN groupadd -r docker && \
-    useradd -r -g docker docker && \
-  	chown -R www-data:docker /var/www/ && \
-    chmod g+w -R /var/www/
+RUN \
+
+    chown -R docker:www-data /var/www/ && \
+    chmod g+w -R /var/www/ && \
+    chmod g+s /var/www
 
 # Setup Adminer
 RUN mkdir /usr/share/adminer
@@ -153,6 +170,35 @@ RUN echo -e '*\n' | a2enmod
 RUN service apache2 restart
 RUN ln -s -T /var/www/adminer.sql.gz /usr/share/adminer/adminer.sql.gz
 RUN ln -s -T /var/www/adminer.sql /usr/share/adminer/adminer.sql
+
+
+# Install Composer.
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+
+RUN  mkdir /.home-linux
+RUN  mkdir /.home-localdev
+RUN  gosu root chown docker:users /.home-linux
+RUN  gosu root chown docker:users /.home-localdev
+
+# All further RUN commands will run as the "docker" user
+USER docker
+
+# Fix permissions
+RUN gosu root chown -R docker:users /home/docker
+
+# Install Drush and Drupal Console
+ENV PATH /home/docker/.composer/vendor/bin:$PATH
+# Install Drupal Console.
+RUN composer global require drush/drush:7.*
+RUN composer global require drupal/console:@stable
+RUN composer global update
+
+# Setup SSH for user docker
+RUN mkdir -p /home/docker/.ssh/ && touch /home/docker/.ssh/authorized_keys
+
+# Fix permissions
+RUN gosu root chown -R docker:users /home/docker
 
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm

@@ -26,10 +26,19 @@ copy_dot_drush ()
   local path="$1/.drush"
   if [ -d $path ]; then
     echo "Copying Drush settings in $path from host..."
-    cp -r $path ~
+     rsync -r $path ~ --exclude=cache
   fi
 }
-
+# Copy Fish Shell settings from host
+# @param $1 path to the home directory (parent of the .drush directory)
+copy_dot_config_fish ()
+{
+  local path="$1/.config/fish"
+  if [ -d $path ]; then
+    echo "Copying Drush settings in $path from host..."
+     cp -r ${path}/* ~/.config/fish/
+  fi
+}
 # Copy bash configuration files from artificial $HOME in docker environment
 # @param $1 path to the home directory (parent of the .drush directory)
 copy_dot_bash ()
@@ -40,6 +49,9 @@ copy_dot_bash ()
     cp -r $path/. ~
   fi
 }
+
+# Reset home directory ownership
+gosu root chown $(id -u):$(id -g) -R ~
 
 # Copy SSH keys from host if available
 copy_ssh_key '/.home/.ssh' # Generic
@@ -52,12 +64,19 @@ copy_dot_drush '/.home-linux' # Linux (docker-compose)
 copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 copy_dot_drush '/.home-localdev'   # Drush overrides from local environment home folder
 
+# Copy Fish settings from host if available
+mkdir -p /home/docker/.config/fish
+copy_dot_config_fish '/.home-linux'
+
 # Copy Bash settings from artificial $HOME folder if available
 copy_dot_bash '/.home-localdev'
-cp  /.home-localdev/{.b,.dr,.p}*  ~ 2>/dev/null 
+cp  /.home-localdev/{.b,.dr,.p}* ~ 2>/dev/null
 
 # Copy scripts from artificial $HOME folder if available
 cp  /.home-localdev/bin/* ~/bin/ 2>/dev/null
+
+# Reset home directory ownership
+gosu root chown $(id -u):$(id -g) -R ~
 
 # Below this is the original startup. Above are the commands brought in from the cli container.
 VOLUME_HOME="/data" 
@@ -72,9 +91,12 @@ if [[ ! -d $VOLUME_HOME/mysql ]]; then
 else
     echo "=> Using an existing volume of MySQL"
 fi
-# Fix MySQL socke ownership issues.
-chown mysql:root /var/run/mysqld
-chmod u+s /var/run/mysqldd
+# Fix MySQL socket ownership issues.
+if [ -d /var/run/mysqld ]; then
+  gosu root chown mysql:root /var/run/mysqld
+  gosu root chmod u+s /var/run/mysqld
+fi
 echo "=> Starting Supervisor daemon"
-exec supervisord -n
+#exec supervisord -n
 
+exec  gosu root supervisord -n
