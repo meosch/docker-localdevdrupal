@@ -12,14 +12,15 @@ This image contains:
 * Apache 2.2
 * MySQL 5.6
 * PHP 5.6
-* ~~Drupal 7.x, [Web Experience Toolkit distribution](https://www.drupal.org/project/wetkit) 4.0, development edition (optionally supports current Drupal)~~
 * [Composer](https://getcomposer.org/)
 * Drush 7.x version
+* Drupal Console
 * Adminer latest
 * Supervisor
+* Fish Shell
+* Github git wrapper hub
+* gosu, sudo
 * nano, vim, git and Mercurial (hg)
-
-~~When launched, the container will contain a ready-to-install Drupal distribution, with no database configured. You need to first create a database by using Adminer off the web root at `/adminer.php`, then select one of PostgreSQL, MySQL or SQLite as a database, when kicking off a Drupal install.~~
 
 A MySQL data base is created if none exists.
 
@@ -35,6 +36,7 @@ This container is being used as part of the meosch/docker-compose-localdevmeos p
 * ~~Drupal: `admin:admin`~~
 * MySQL: `root:` (no password)
 * SSH: `root:root`
+* SSH: `docker:docker`
 * Supervisor `supervisor:supervisor`
 
 ### Exposed ports
