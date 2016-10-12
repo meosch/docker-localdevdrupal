@@ -175,6 +175,8 @@ RUN ln -s -T /var/www/adminer.sql /usr/share/adminer/adminer.sql
 # Install Composer.
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
+# Add composer bin directory to PATH
+ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 RUN  mkdir /.home-linux
 RUN  mkdir /.home-localdev
@@ -187,10 +189,24 @@ USER docker
 # Fix permissions
 RUN gosu root chown -R docker:users /home/docker
 
-# Install Drush and Drupal Console
-ENV PATH /home/docker/.composer/vendor/bin:$PATH
+# Install Drush 8 as default
+ RUN composer global require drush/drush:8.* && \
+
+# Legacy Drush versions (6 and 7)
+  mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
+  mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
+  echo "" >> $HOME/.bash_aliases && \
+  echo "# Aliases added to the container in the Docker file for Drush 6, 7, 8 and Drupal Coding standards checker." >> $HOME/.bash_aliases && \
+  echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+  echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+  echo "alias drush8='$HOME/.composer/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+
+# Drupal Coder w/ a matching version of PHP_CodeSniffer
+  composer global require drupal/coder && \
+  phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer && \
+  echo "alias drupalcs=\"phpcs --standard=Drupal --extensions='php,module,inc,install,test,profile,theme,css,info,txt'\"" >> $HOME/.bash_aliases
+
 # Install Drupal Console.
-RUN composer global require drush/drush:7.*
 RUN composer global require drupal/console:@stable
 RUN composer global update
 
