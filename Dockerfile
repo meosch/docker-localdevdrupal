@@ -195,11 +195,6 @@ RUN gosu root chown -R docker:users /home/docker
 # Legacy Drush versions (6 and 7)
   mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
   mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
-  echo "" >> $HOME/.bash_aliases && \
-  echo "# Aliases added to the container in the Docker file for Drush 6, 7, 8 and Drupal Coding standards checker." >> $HOME/.bash_aliases && \
-  echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases && \
-  echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases && \
-  echo "alias drush8='$HOME/.composer/vendor/bin/drush'" >> $HOME/.bash_aliases && \
 
 # Drupal Coder w/ a matching version of PHP_CodeSniffer
   composer global require drupal/coder && \
