@@ -160,7 +160,7 @@ RUN \
     chmod g+w -R /var/www/ && \
     chmod g+s /var/www
 
-# Setup Adminer
+# Setup Adminer and phpinfo() aliases
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
 RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/phpinfo.php
