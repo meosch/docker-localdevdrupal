@@ -78,6 +78,11 @@ cp  /.home-localdev/bin/* ~/bin/ 2>/dev/null
 # Reset home directory ownership
 gosu root chown $(id -u):$(id -g) -R ~
 
+# Check if project/docroot exists in public_html folder, otherwise create it.
+if [[ ! -d $VOLUME_HOME/project/docroot ]]; then
+  mkdir -p $VOLUME_HOME/project/docroot
+fi
+
 # Below this is the original startup. Above are the commands brought in from the cli container.
 VOLUME_HOME="/data" 
 

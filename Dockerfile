@@ -89,8 +89,8 @@ RUN sed -i 's/user = /c user = docker/' /etc/php5/apache2/php.ini
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf
 RUN sed -i 's/VirtualHost \*:80/VirtualHost \*/' /etc/apache2/sites-available/default
-RUN sed -i 's@DocumentRoot /var/www@DocumentRoot /var/www/project/docroot@' /etc/apache2/sites-available/default
-RUN sed -i 's@Directory /var/www/@Directory /var/www/project/docroot@' /etc/apache2/sites-available/default
+RUN sed -i 's@DocumentRoot /var/www@DocumentRoot /var/www/docroot@' /etc/apache2/sites-available/default
+RUN sed -i 's@Directory /var/www/@Directory /var/www/docroot@' /etc/apache2/sites-available/default
 RUN echo -e '*\n' | a2enmod
 
 # Some Environment Variables
