@@ -88,7 +88,9 @@ RUN sed -i 's/user = /c user = docker/' /etc/php5/apache2/php.ini
 # 8080 by default, we set it up for that port.
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf
-RUN sed -i 's/VirtualHost *:80/VirtualHost */' /etc/apache2/sites-available/default
+RUN sed -i 's/VirtualHost \*:80/VirtualHost \*/' /etc/apache2/sites-available/default
+RUN sed -i 's@DocumentRoot /var/www@DocumentRoot /var/www/docroot@' /etc/apache2/sites-available/default
+RUN sed -i 's@Directory /var/www/@Directory /var/www/docroot@' /etc/apache2/sites-available/default
 RUN echo -e '*\n' | a2enmod
 
 # Some Environment Variables
@@ -160,7 +162,7 @@ RUN \
     chmod g+w -R /var/www/ && \
     chmod g+s /var/www
 
-# Setup Adminer
+# Setup Adminer and phpinfo() aliases
 RUN mkdir /usr/share/adminer
 RUN wget -c http://www.adminer.org/latest.php -O /usr/share/adminer/adminer.php
 RUN echo -e '<?php phpinfo(); ?>' >> /usr/share/adminer/phpinfo.php
