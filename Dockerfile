@@ -57,6 +57,7 @@ curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --pr
 RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    # Add "docker" user to sudoers file to allow super user permissions
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Install github's hub. A command-line wrapper for git that makes you better at GitHub.
@@ -92,6 +93,8 @@ RUN sed -i 's/VirtualHost \*:80/VirtualHost \*/' /etc/apache2/sites-available/de
 RUN sed -i 's@DocumentRoot /var/www@DocumentRoot /var/www/docroot@' /etc/apache2/sites-available/default
 RUN sed -i 's@Directory /var/www/@Directory /var/www/docroot@' /etc/apache2/sites-available/default
 RUN echo -e '*\n' | a2enmod
+# Add www-data Apache2 user to "users" group (along with the "docker" user)
+RUN usermod -a -G users www-data
 
 # Some Environment Variables
 ENV    DEBIAN_FRONTEND noninteractive
@@ -185,7 +188,7 @@ RUN  mkdir /.home-localdev
 RUN  gosu root chown docker:users /.home-linux
 RUN  gosu root chown docker:users /.home-localdev
 
-# All further RUN commands will run as the "docker" user
+###### All further RUN commands will run as the "docker" user ######
 USER docker
 
 # Fix permissions
